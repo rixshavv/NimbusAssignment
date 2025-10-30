@@ -1,0 +1,40 @@
+import java.util.*;
+import java.util.stream.*;
+
+class Product {
+    String name;
+    double price;
+
+    Product(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public String toString() {
+        return name + " - " + price;
+    }
+}
+
+public class StreamOnProducts {
+    public static void main(String[] args) {
+        List<Product> products = Arrays.asList(
+                new Product("Laptop", 60000),
+                new Product("Mouse", 800),
+                new Product("Keyboard", 1500),
+                new Product("Monitor", 12000)
+        );
+
+        // Filter products above 1000
+        System.out.println("Products above ₹1000:");
+        products.stream()
+                .filter(p -> p.price > 1000)
+                .forEach(System.out::println);
+
+        // Average price
+        double avg = products.stream()
+                .mapToDouble(p -> p.price)
+                .average()
+                .orElse(0.0);
+        System.out.println("\nAverage Price: " + avg);
+    }
+}
