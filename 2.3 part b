@@ -1,0 +1,32 @@
+import java.util.*;
+import java.util.stream.*;
+
+class Student {
+    String name;
+    int marks;
+
+    Student(String name, int marks) {
+        this.name = name;
+        this.marks = marks;
+    }
+
+    public String toString() {
+        return name + " - " + marks;
+    }
+}
+
+public class FilterSortStudents {
+    public static void main(String[] args) {
+        List<Student> students = Arrays.asList(
+                new Student("Major", 85),
+                new Student("Ravi", 60),
+                new Student("Neha", 92)
+        );
+
+        System.out.println("Students with marks > 70 sorted descending:");
+        students.stream()
+                .filter(s -> s.marks > 70)
+                .sorted((s1, s2) -> s2.marks - s1.marks)
+                .forEach(System.out::println);
+    }
+}
