@@ -1,0 +1,164 @@
+CREATE TABLE Employee (
+  EmpID INT PRIMARY KEY,
+  Name VARCHAR(50),
+  Salary DOUBLE
+);
+import java.sql.*;
+
+public class EmployeeFetch {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/nimbusdb";
+        String user = "root"; 
+        String pass = "root"; 
+
+        try {
+       
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            Connection con = DriverManager.getConnection(url, user, pass);
+
+            Statement stmt = con.createStatement();
+
+            ResultSet rs = stmt.executeQuery("SELECT * FROM Employee");
+
+          
+            System.out.println("EmpID\tName\tSalary");
+            System.out.println("---------------------------");
+            while (rs.next()) {
+                System.out.println(rs.getInt("EmpID") + "\t" +
+                                   rs.getString("Name") + "\t" +
+                                   rs.getDouble("Salary"));
+            }
+
+            // 6. Close Connection
+            con.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+public class Student {
+    private int studentID;
+    private String name;
+    private String department;
+    private double marks;
+
+    public Student(int studentID, String name, String department, double marks) {
+        this.studentID = studentID;
+        this.name = name;
+        this.department = department;
+        this.marks = marks;
+    }
+
+   
+    public int getStudentID() { return studentID; }
+    public String getName() { return name; }
+    public String getDepartment() { return department; }
+    public double getMarks() { return marks; }
+}
+import java.sql.*;
+import java.util.*;
+
+public class StudentDAO {
+    private Connection con;
+
+    public StudentDAO() throws Exception {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        con = DriverManager.getConnection("jdbc:mysql://localhost:3306/nimbusdb", "root", "root");
+    }
+
+    public void addStudent(Student s) throws Exception {
+        String query = "INSERT INTO Student VALUES(?,?,?,?)";
+        PreparedStatement ps = con.prepareStatement(query);
+        ps.setInt(1, s.getStudentID());
+        ps.setString(2, s.getName());
+        ps.setString(3, s.getDepartment());
+        ps.setDouble(4, s.getMarks());
+        ps.executeUpdate();
+        System.out.println("Student Added!");
+    }
+
+    public List<Student> getAllStudents() throws Exception {
+        List<Student> list = new ArrayList<>();
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery("SELECT * FROM Student");
+        while (rs.next()) {
+            list.add(new Student(rs.getInt(1), rs.getString(2),
+                                 rs.getString(3), rs.getDouble(4)));
+        }
+        return list;
+    }
+
+    public void updateStudent(int id, double marks) throws Exception {
+        PreparedStatement ps = con.prepareStatement("UPDATE Student SET Marks=? WHERE StudentID=?");
+        ps.setDouble(1, marks);
+        ps.setInt(2, id);
+        ps.executeUpdate();
+        System.out.println("Student Updated!");
+    }
+
+    public void deleteStudent(int id) throws Exception {
+        PreparedStatement ps = con.prepareStatement("DELETE FROM Student WHERE StudentID=?");
+        ps.setInt(1, id);
+        ps.executeUpdate();
+        System.out.println("Student Deleted!");
+    }
+}
+import java.util.*;
+
+public class StudentApp {
+    public static void main(String[] args) throws Exception {
+        Scanner sc = new Scanner(System.in);
+        StudentDAO dao = new StudentDAO();
+
+        while (true) {
+            System.out.println("\n=== Student Management ===");
+            System.out.println("1. Add Student");
+            System.out.println("2. View Students");
+            System.out.println("3. Update Student");
+            System.out.println("4. Delete Student");
+            System.out.println("5. Exit");
+            System.out.print("Enter choice: ");
+            int ch = sc.nextInt();
+
+            switch (ch) {
+                case 1:
+                    System.out.print("Enter ID: ");
+                    int id = sc.nextInt();
+                    sc.nextLine();
+                    System.out.print("Enter Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Enter Department: ");
+                    String dept = sc.nextLine();
+                    System.out.print("Enter Marks: ");
+                    double marks = sc.nextDouble();
+                    dao.addStudent(new Student(id, name, dept, marks));
+                    break;
+
+                case 2:
+                    for (Student s : dao.getAllStudents()) {
+                        System.out.println(s.getStudentID() + " " + s.getName() + " " +
+                                           s.getDepartment() + " " + s.getMarks());
+                    }
+                    break;
+
+                case 3:
+                    System.out.print("Enter Student ID to Update: ");
+                    int uid = sc.nextInt();
+                    System.out.print("Enter New Marks: ");
+                    double newMarks = sc.nextDouble();
+                    dao.updateStudent(uid, newMarks);
+                    break;
+
+                case 4:
+                    System.out.print("Enter Student ID to Delete: ");
+                    int did = sc.nextInt();
+                    dao.deleteStudent(did);
+                    break;
+
+                case 5:
+                    System.exit(0);
+            }
+        }
+    }
+}
